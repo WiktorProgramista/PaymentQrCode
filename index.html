@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        <meta charset="utf-8"/>
+    </head>
+    <style>
+
+        input[type=text] {
+            width: 50%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            margin-top: 6px; 
+            margin-bottom: 5px; 
+            resize: vertical;
+        }
+
+        input[type=button] {
+            background-color: #04AA6D;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 50%;
+        }
+
+        #tabelka{
+            margin:auto;
+            width: 500px;
+        }
+
+        #form{
+            margin:auto;
+            width: 500px;
+        }
+ 
+        th{
+            background-color: #04AA6D;
+            color: #fff;
+            padding: 20px;
+        }
+ 
+        td{
+            padding: 20px;
+            border: solid 1px #333;
+        }
+    </style>
+    <body>
+        <form id="form">
+            <input type="text" id="kraj" placeholder="kraj"><br>
+            <input type="text" id="numer" placeholder="numer konta" pattern="[a-zA-Z]\s+[0-9]{4}\s+[0-9]{4}\s+[0-9]{4}\s+[0-9]{4}\s[0-9]{4}\s+[0-9]{4}"><br>
+            <input type="text" id="kwota" placeholder="kwota"><br>
+            <input type="text" id="dostawca" placeholder="dostawca"><br>
+            <input type="text" id="opis" placeholder="opis"><br>
+           <input type="button" value="dodaj" onclick="dodaj()">
+            <div id="tabelka"></div><br>
+        </form>
+    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.qrcode.min.js"></script>
+    <script>
+        //|PL|01 8191 0003 2211 5626 4067 1090|123.45|Orange|Przelew za telefon|||
+ 
+        class Payment{
+            constructor(kraj, numer, kwota, dostawca, opis){
+                this.kraj = kraj;
+                this.numer = numer,
+                this.kwota = kwota,
+                this.dostawca = dostawca;
+                this.opis = opis;
+                this.qrcodeMake = function(index){
+                    return jQuery('#test'+index).qrcode("|"+this.kraj+"|"+this.numer+"|"+this.kwota*100+"|"+this.dostawca+"|"+this.opis+"|||");
+                }
+            }
+        }
+        
+        var tablica = [];   
+
+        function dodaj(){
+            var isTrue = false;
+            var form = document.getElementById("form");
+            wzory = {
+                'kraj': /^[a-zA-Z]{2}$/i,
+                'numer': /^[0-9]{2}\s+[0-9]{4}\s+[0-9]{4}\s+[0-9]{4}\s+[0-9]{4}\s+[0-9]{4}\s+[0-9]{4}$/i
+            };
+            for (var pole in wzory){
+                if (form[pole])
+                {
+                    if (!wzory[pole].test(form[pole].value))
+                    {
+                        alert('Pole ' + pole + " jest niepoprawne!");
+                        form[pole].style.background = 'red';
+                        isTrue = false;
+                    }else{
+                        form[pole].style.background = '';
+                        isTrue = true;
+                    }
+                }
+            }
+            if(isTrue == true){
+                var kraj = document.getElementById("kraj").value;
+                var numer = document.getElementById("numer").value;
+                var kwota = document.getElementById("kwota").value;
+                var dostawca = document.getElementById("dostawca").value;
+                var opis = document.getElementById("opis").value;
+                tablica[tablica.length] = new Payment(kraj,numer,kwota,dostawca,opis);
+                var text = document.getElementById("tabelka");
+                var table = '<table><thead><tr><th>QRcode</th><th>Info</th></tr></thead><tbody>';
+        
+                for(var i=0; i < tablica.length; i++){
+                    table += '<tr>' + '<td>'+'<div id="test'+(i+1)+'"">' + '<td>' + '<div id="info'+(i+1)+'"">'+tablica[i]["kraj"]+"<br>"+tablica[i]["kwota"]+"<br>"+tablica[i]["dostawca"]+"<br>"+tablica[i]["opis"]+'</div>' + '</td>' +'</tr>';
+                }
+        
+                table += '</tbody></table>';
+            
+                text.innerHTML = table;
+        
+                for(var i=0; i < tablica.length; i++){
+                    tablica[i].qrcodeMake(i+1);
+                }
+            }
+        }
+ 
+    </script>
+   
+</html>
